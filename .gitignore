@@ -3,3 +3,7 @@
 
 *.wlf
 transcript
+
+*.mem
+*.uyvy
+*.jpeg
