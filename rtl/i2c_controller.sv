@@ -18,7 +18,7 @@ module i2c_controller #(
   output logic done_o
 );
 
-enum logic[2:0] { IDLE, INIT, SEND, INCR, DONE} st;
+enum logic[2:0] { IDLE, INIT, SEND, INCR, DONE} st_s;
 
 logic                     i2c_send_s;
 logic[$clog2(NBYTES)-1:0] i2c_nbytes_s;
@@ -65,49 +65,52 @@ i2c_0 (
 always_ff @(posedge clk_i) begin : i2c_fsmd
   if (!rst_n_i) begin
     i2c_trans_cnt_s <= NTRANS;
-    i2c_nbytes_s    <= NBYTES;
+    i2c_nbytes_s    <= 'd2;
     rom_addr_s      <= 'd0;
-    st              <= IDLE;
+    done_o          <= 1'b0;
+    st_s            <= IDLE;
   end else begin
-    case(st)
+    case(st_s)
       IDLE: begin
         if (start_1cc_i) begin
           i2c_trans_cnt_s <= NTRANS;
-          i2c_nbytes_s    <= NBYTES;
+          i2c_nbytes_s    <= 'd2; //First I2C transaction needs to send 2 bytes
           rom_addr_s      <= 'd0;
-          st              <= INIT;
+          done_o          <= 1'b0;
+          st_s            <= INIT;
         end
       end
 
       INIT: begin
-        st <= SEND;
+        st_s <= SEND;
       end
 
       SEND: begin
         if (i2c_done_s) begin
+          i2c_nbytes_s    <= NBYTES;
           i2c_trans_cnt_s <= i2c_trans_cnt_s - 1'b1;
           rom_addr_s      <= rom_addr_s + 1'b1;
         end
 
-        st <= i2c_ready_s ? INCR : SEND;
+        st_s <= i2c_ready_s ? INCR : SEND;
       end
 
       INCR: begin
         if (i2c_trans_cnt_s > 0) begin
-          st <= INIT;
+          st_s <= INIT;
         end else begin
           done_o <= 1'b1;
-          st     <= DONE;
+          st_s   <= DONE;
         end
       end
 
       DONE: begin end
 
-      default: st <= IDLE;
+      default: st_s <= IDLE;
     endcase
   end
 end
 
-assign i2c_send_s = (st == INIT);
+assign i2c_send_s = (st_s == INIT);
 
 endmodule

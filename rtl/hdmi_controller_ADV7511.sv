@@ -24,12 +24,12 @@ module hdmi_controller_ADV7511
   parameter I2C_INIT_FILE   = "i2c_rom.mem",
 
   localparam FB_X         = ACTIVE_H_PIXELS >> FRAME_X_SCALE,
-  localparam FB_Y         = ACTIVE_LINES    >> FRAME_X_SCALE,
+  localparam FB_Y         = ACTIVE_LINES    >> FRAME_Y_SCALE,
   localparam FB_ADDR_BITS = $clog2(FB_X*FB_Y)
 )(
   input  logic                   clk_i      ,
   input  logic                   rst_n_i    ,
-  input  logic                   pixel_clk_i, //This should be x2 target
+  input  logic                   pixel_clk_i,
 
   input  logic[FB_ADDR_BITS-1:0] pxl_addr_i ,
   input  logic[23:0]             pxl_data_i ,
@@ -60,10 +60,10 @@ localparam VCNTR_BITS   = $clog2(TOTAL_LINES);
 
 logic[HCNTR_BITS-1:0]        hcount_s;
 logic[VCNTR_BITS-1:0]        vcount_s;
-logic[$clog2(FB_X*FB_Y)-1:0] rd_addr_s;
 logic[15:0]                  rd_data_s;
-logic[7:0]                   y_s, cb_s, cr_s;
-logic[7:0]                   chroma_s;
+
+(* use_dsp = "yes" *) 
+logic[$clog2(FB_X*FB_Y)-1:0] rd_addr_s;
 
 assign rd_addr_s = vcount_s * FB_X + hcount_s;
 assign hdmi_d_o  = ad_o ? rd_data_s : 16'b0;

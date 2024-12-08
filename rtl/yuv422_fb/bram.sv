@@ -26,6 +26,8 @@ always_ff @(posedge clk_i) begin
   end
 end
 
-assign rd_d_o = mem[rd_addr_i];
+always_ff @(posedge clk_i) begin
+  rd_d_o <= mem[rd_addr_i];
+end
 
 endmodule

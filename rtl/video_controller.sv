@@ -46,7 +46,7 @@ always_ff @(posedge clk_i) begin
     posedge_pxl_clk_ff_s <= pixel_clk_i;
   end
 end
-assign posedge_pxl_clk_s = ~posedge_pxl_clk_ff_s & clk_i;
+assign posedge_pxl_clk_s = ~posedge_pxl_clk_ff_s & pixel_clk_i;
 
 // {H,V}-counters
 always_ff @(posedge clk_i) begin : hv_counters
@@ -76,18 +76,18 @@ always_ff @(posedge clk_i) begin : rolling_fc
 end
 
 always_comb begin : deduce_vid_st
-  video_st_s = (hcount_o < ACTIVE_H_PIXELS) && 
-               (vcount_o < ACTIVE_LINES)  ? ACTIVE_VIDEO : INACTIVE_VIDEO;
+  video_st_s = ((hcount_o < ACTIVE_H_PIXELS) && 
+               (vcount_o < ACTIVE_LINES))  ? ACTIVE_VIDEO : INACTIVE_VIDEO;
 end
 
 always_comb begin : hv_syncs
   hs_o = (hcount_o > ACTIVE_H_PIXELS + H_FRONT_PORCH               ) && 
          (hcount_o < ACTIVE_H_PIXELS + H_FRONT_PORCH + H_SYNC_WIDTH);
 
-  vs_o = (hcount_o > ACTIVE_H_PIXELS + H_FRONT_PORCH               ) && 
-         (hcount_o < ACTIVE_H_PIXELS + H_FRONT_PORCH + H_SYNC_WIDTH);
+  vs_o = (vcount_o > ACTIVE_LINES + V_FRONT_PORCH               ) && 
+         (vcount_o < ACTIVE_LINES + V_FRONT_PORCH + V_SYNC_WIDTH);
 end
 
 assign ad_o = (video_st_s == ACTIVE_VIDEO);
-assign nf_o = (hcount_o == ACTIVE_H_PIXELS) && (hcount_o == ACTIVE_H_PIXELS);
+assign nf_o = (hcount_o == ACTIVE_H_PIXELS) && (vcount_o == ACTIVE_LINES);
 endmodule
