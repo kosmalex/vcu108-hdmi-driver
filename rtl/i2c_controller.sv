@@ -5,7 +5,7 @@ module i2c_controller #(
   FREE_HOLD   = 10,
   DATA_HOLD   = 5,
   NBYTES      = 3,
-  NTRANS      = 1,
+  NTRANS      = 40,
   INIT_FILE   = "i2c_rom.mem"
 )(
   input  logic clk_i,
@@ -13,10 +13,12 @@ module i2c_controller #(
   input  logic start_1cc_i,
 
   output logic scl_o,
-  inout  logic sda_io
+  inout  logic sda_io,
+
+  output logic done_o
 );
 
-enum logic[2:0] { IDLE, INIT, SEND, INCR } st;
+enum logic[2:0] { IDLE, INIT, SEND, INCR, DONE} st;
 
 logic                     i2c_send_s;
 logic[$clog2(NBYTES)-1:0] i2c_nbytes_s;
@@ -94,9 +96,12 @@ always_ff @(posedge clk_i) begin : i2c_fsmd
         if (i2c_trans_cnt_s > 0) begin
           st <= INIT;
         end else begin
-          st <= IDLE;
+          done_o <= 1'b1;
+          st     <= DONE;
         end
       end
+
+      DONE: begin end
 
       default: st <= IDLE;
     endcase

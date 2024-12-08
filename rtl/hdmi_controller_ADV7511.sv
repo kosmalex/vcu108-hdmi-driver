@@ -10,6 +10,8 @@ module hdmi_controller_ADV7511
   parameter V_SYNC_WIDTH    = 5   ,
   parameter V_BACK_PORCH    = 20  ,
   parameter FPS             = 60  ,
+  parameter FRAME_X_SCALE   = 0   , // These are 2^{frame_scale}
+  parameter FRAME_Y_SCALE   = 0   , // These are 2^{frame_scale}
 
   // I2C generics
   parameter DIVIDER         = 50  ,
@@ -18,24 +20,65 @@ module hdmi_controller_ADV7511
   parameter FREE_HOLD       = 10  ,
   parameter DATA_HOLD       = 5   ,
   parameter NBYTES          = 3   ,
-  parameter NTRANS          = 1   ,
-  parameter INIT_FILE       = "i2c_rom.mem"
+  parameter NTRANS          = 41  ,
+  parameter I2C_INIT_FILE   = "i2c_rom.mem",
+
+  localparam FB_X         = ACTIVE_H_PIXELS >> FRAME_X_SCALE,
+  localparam FB_Y         = ACTIVE_LINES    >> FRAME_X_SCALE,
+  localparam FB_ADDR_BITS = $clog2(FB_X*FB_Y)
 )(
-  input  logic                 clk_i      ,
-  input  logic                 rst_n_i    ,
-  input  logic                 pixel_clk_i,
+  input  logic                   clk_i      ,
+  input  logic                   rst_n_i    ,
+  input  logic                   pixel_clk_i, //This should be x2 target
+
+  input  logic[FB_ADDR_BITS-1:0] pxl_addr_i ,
+  input  logic[23:0]             pxl_data_i ,
+  input  logic                   pxl_en_i   ,
 
   // HDMI
-  output logic                 vs_o       , //vertical sync out
-  output logic                 hs_o       , //horizontal sync out
-  output logic                 ad_o       ,
+  output logic                   vs_o    , //Vertical sync out
+  output logic                   hs_o    , //Horizontal sync out
+  output logic                   ad_o    ,
+  output logic[15:0]             hdmi_d_o,
+
   // I2C or IIC
-  output logic                 scl_o      ,
-  inout  logic                 sda_io
+  output logic                   scl_o      ,
+  inout  logic                   sda_io     ,
+  output logic                   i2c_done_o
 );
 
-logic start_1cc_i;
-assign start_1cc_i = 1;
+localparam TOTAL_PIXELS = ACTIVE_H_PIXELS 
+                          + H_FRONT_PORCH 
+                          + H_SYNC_WIDTH  
+                          + H_BACK_PORCH; //Horizontal pixel count
+localparam TOTAL_LINES  = ACTIVE_LINES    
+                          + V_FRONT_PORCH 
+                          + V_SYNC_WIDTH  
+                          + V_BACK_PORCH; //Vertical pixel count
+localparam HCNTR_BITS   = $clog2(TOTAL_PIXELS);
+localparam VCNTR_BITS   = $clog2(TOTAL_LINES);
+
+logic[HCNTR_BITS-1:0]        hcount_s;
+logic[VCNTR_BITS-1:0]        vcount_s;
+logic[$clog2(FB_X*FB_Y)-1:0] rd_addr_s;
+logic[15:0]                  rd_data_s;
+logic[7:0]                   y_s, cb_s, cr_s;
+logic[7:0]                   chroma_s;
+
+assign rd_addr_s = vcount_s * FB_X + hcount_s;
+assign hdmi_d_o  = ad_o ? rd_data_s : 16'b0;
+
+yuv422_fb #(
+  .PIXELS(FB_X*FB_Y)
+)
+yuv422_fb_0(
+  .*,
+  .wr_addr_i (pxl_addr_i),
+  .wr_d_i    (pxl_data_i),
+  .wr_en_i   (pxl_en_i  ),
+  .rd_addr_i (rd_addr_s ),
+  .rd_d_o    (rd_data_s )
+);
 
 video_controller #(
   .ACTIVE_H_PIXELS (ACTIVE_H_PIXELS),
@@ -50,24 +93,27 @@ video_controller #(
 )
 video_controller_0 (
   .*,
-
-  .hcount_o (/*Unconnected*/),
-  .vcount_o (/*Unconnected*/),
-  .nf_o     (/*Unconnected*/),
-  .fc_o     (/*Unconnected*/) 
+  .hcount_o (hcount_s),
+  .vcount_o (vcount_s),
+  .nf_o     (/*Not connected*/),
+  .fc_o     (/*Not connected*/)
 );
 
 i2c_controller
 #(
-  .DIVIDER    (DIVIDER   ),
-  .START_HOLD (START_HOLD),
-  .STOP_HOLD  (STOP_HOLD ),
-  .FREE_HOLD  (FREE_HOLD ),
-  .DATA_HOLD  (DATA_HOLD ),
-  .NBYTES     (NBYTES    ),
-  .NTRANS     (NTRANS    ),
-  .INIT_FILE  (INIT_FILE )
+  .DIVIDER    (DIVIDER      ),
+  .START_HOLD (START_HOLD   ),
+  .STOP_HOLD  (STOP_HOLD    ),
+  .FREE_HOLD  (FREE_HOLD    ),
+  .DATA_HOLD  (DATA_HOLD    ),
+  .NBYTES     (NBYTES       ),
+  .NTRANS     (NTRANS       ),
+  .INIT_FILE  (I2C_INIT_FILE)
 )
-i2c_controller (.*);
+i2c_controller(
+  .*,
+  .start_1cc_i(1'b1      ),
+  .done_o     (i2c_done_o)
+);
 
 endmodule

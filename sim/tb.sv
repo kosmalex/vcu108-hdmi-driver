@@ -2,7 +2,7 @@
 
 module tb;
 // Clocks
-parameter SYS_CLK = 200;
+parameter SYS_CLK = 1000;
 parameter PXL_CLK = 13500;
 
 // HDMI generics
@@ -15,6 +15,9 @@ parameter V_FRONT_PORCH   = 5   ;
 parameter V_SYNC_WIDTH    = 5   ;
 parameter V_BACK_PORCH    = 20  ;
 parameter FPS             = 60  ;
+parameter FRAME_X_SCALE   = 0   ; // These are 2^{frame_scale}
+parameter FRAME_Y_SCALE   = 0   ; // These are 2^{frame_scale}
+
 
 // I2C generics
 parameter DIVIDER         = 50;
@@ -23,23 +26,37 @@ parameter STOP_HOLD       = 10;
 parameter FREE_HOLD       = 10;
 parameter DATA_HOLD       = 5 ;
 parameter NBYTES          = 3 ;
-parameter NTRANS          = 10;
+parameter NTRANS          = 41;
+
+localparam FB_X         = ACTIVE_H_PIXELS >> FRAME_X_SCALE;
+localparam FB_Y         = ACTIVE_LINES    >> FRAME_X_SCALE;
+localparam FB_ADDR_BITS = $clog2(FB_X*FB_Y);
 
 logic clk_i       = 0;
 logic rst_n_i     = 1;
 logic pixel_clk_i = 0;
 
+logic[FB_ADDR_BITS-1:0] pxl_addr_i;
+logic[23:0]             pxl_data_i;
+logic                   pxl_en_i  ;
+
 // HDMI
-logic vs_o; //vertical sync out
-logic hs_o; //horizontal sync out
-logic ad_o;
+logic       vs_o; //vertical sync out
+logic       hs_o; //horizontal sync out
+logic       ad_o;
+logic[15:0] hdmi_d_o;
+
 // I2C or IIC
 logic scl_o;
 wire  sda_io;
+logic i2c_done_o;
 
 always begin
-  #5ns clk_i       = ~clk_i;
-  #5ns pixel_clk_i = ~pixel_clk_i;
+  #SYS_CLK clk_i = ~clk_i;
+end
+
+always begin
+  #PXL_CLK pixel_clk_i = ~pixel_clk_i;
 end
 
 hdmi_controller_ADV7511
@@ -53,6 +70,9 @@ hdmi_controller_ADV7511
   .V_SYNC_WIDTH   (V_SYNC_WIDTH   ),
   .V_BACK_PORCH   (V_BACK_PORCH   ), 
   .FPS            (FPS            ),
+  .FRAME_X_SCALE  (FRAME_X_SCALE  ),
+  .FRAME_Y_SCALE  (FRAME_Y_SCALE  ),
+
   .DIVIDER        (DIVIDER        ),
   .START_HOLD     (START_HOLD     ),
   .STOP_HOLD      (STOP_HOLD      ),
