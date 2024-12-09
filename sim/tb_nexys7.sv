@@ -2,7 +2,7 @@
 
 module tb_nexys7;
 // Clocks
-parameter SYS_CLK = 1000;
+parameter SYS_CLK = 5000;
 parameter PXL_CLK = 25175;
 
 // HDMI generics

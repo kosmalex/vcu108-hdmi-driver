@@ -14,13 +14,13 @@ module hdmi_controller_ADV7511
   parameter FRAME_Y_SCALE   = 0   , // These are 2^{frame_scale}
 
   // I2C generics
-  parameter DIVIDER         = 50  ,
-  parameter START_HOLD      = 10  ,
-  parameter STOP_HOLD       = 10  ,
-  parameter FREE_HOLD       = 10  ,
-  parameter DATA_HOLD       = 5   ,
-  parameter NBYTES          = 3   ,
-  parameter NTRANS          = 41  ,
+  parameter DIVIDER         = 13,
+  parameter START_HOLD      = 5 ,
+  parameter STOP_HOLD       = 5 ,
+  parameter FREE_HOLD       = 5 ,
+  parameter DATA_HOLD       = 2 ,
+  parameter NBYTES          = 3 ,
+  parameter NTRANS          = 41,
   parameter I2C_INIT_FILE   = "i2c_rom.mem",
 
   localparam FB_X         = ACTIVE_H_PIXELS >> FRAME_X_SCALE,

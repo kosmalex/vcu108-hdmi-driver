@@ -1,7 +1,7 @@
 module hdmi_wrapper_vcu108 (
   input  logic       clk_i  ,
   input  logic       clk_n_i,
-  input  logic       rst_n_i,
+  input  logic       rst_i,
 
   // HDMI
   output logic       HDMI_R_CLK, //pixel_clk
@@ -17,6 +17,7 @@ module hdmi_wrapper_vcu108 (
   output logic GPIO_LED_0_LS
 );
 
+logic rst_n_s;
 logic clk_s, pixel_clk_s;
 logic vs_s, hs_s;
 
@@ -24,31 +25,22 @@ clk_wiz_0 clk_gen (
   .clk_in1_p (clk_i  ),
   .clk_in1_n (clk_n_i),
 
-  .clk_out1  (clk_s  )
-);
-
-clk_divider #(
-  .DIVIDER (4)
-)
-clk_divider_0(
-  .clk_i   (clk_s),
-  .hold_i  (1'b0),
-  .reset_i (1'b0),
-  .clk_o   (pixel_clk_s)
+  .clk_out1  (clk_s),
+  .clk_out2  (pixel_clk_s)
 );
 
 hdmi_controller_ADV7511
 #(
   // HDMI generics
-  .ACTIVE_H_PIXELS(640 ),
-  .H_FRONT_PORCH  (16  ),
-  .H_SYNC_WIDTH   (96  ),
-  .H_BACK_PORCH   (48  ),
-  .ACTIVE_LINES   (480 ),
-  .V_FRONT_PORCH  (11  ),
-  .V_SYNC_WIDTH   (2   ),
-  .V_BACK_PORCH   (31  ),
-  .FPS            (30  ),
+  .ACTIVE_H_PIXELS(1280),
+  .H_FRONT_PORCH  (110 ),
+  .H_SYNC_WIDTH   (40  ),
+  .H_BACK_PORCH   (220 ),
+  .ACTIVE_LINES   (720 ),
+  .V_FRONT_PORCH  (5   ),
+  .V_SYNC_WIDTH   (5   ),
+  .V_BACK_PORCH   (20  ),
+  .FPS            (60  ),
   .FRAME_X_SCALE  (0   ), // These are 2^{frame_scale}
   .FRAME_Y_SCALE  (0   ), // These are 2^{frame_scale}
 
@@ -63,7 +55,7 @@ hdmi_controller_ADV7511
   .I2C_INIT_FILE ("i2c_rom.mem")
 )
 hdmi_controller_ADV7511_0(
-  .*,
+  .rst_n_i    (rst_n_s      ),
   .clk_i      (clk_s        ),
   .pixel_clk_i(pixel_clk_s  ),
   .vs_o       (vs_s         ),
@@ -84,4 +76,6 @@ assign HDMI_R_HSYNC = ~hs_s;
 assign HDMI_R_CLK   = pixel_clk_s;
 
 assign iic_mux_o = 1'b1;
+
+assign rst_n_s = !rst_i;
 endmodule

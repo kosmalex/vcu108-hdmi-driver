@@ -2,8 +2,7 @@
 
 module tb_vcu108;
 // Clocks
-parameter SYS_CLK = 1000;
-parameter PXL_CLK = 25175;
+parameter SYS_CLK = 3333;
 
 // HDMI generics
 parameter ACTIVE_H_PIXELS = 640;//1280;
@@ -32,35 +31,29 @@ localparam FB_X         = ACTIVE_H_PIXELS >> FRAME_X_SCALE;
 localparam FB_Y         = ACTIVE_LINES    >> FRAME_X_SCALE;
 localparam FB_ADDR_BITS = $clog2(FB_X*FB_Y);
 
-logic clk_i       = 0;
-logic rst_n_i     = 1;
-logic pixel_clk_i = 0;
-
-logic[FB_ADDR_BITS-1:0] pxl_addr_i;
-logic[23:0]             pxl_data_i;
-logic                   pxl_en_i  ;
+logic       clk_i   = 0;
+logic       clk_n_i = 1;
+logic       rst_n_i = 0;
 
 // HDMI
-logic       vs_o; //vertical sync out
-logic       hs_o; //horizontal sync out
-logic       ad_o;
-logic[15:0] hdmi_d_o;
-logic[3:0]  red_o;
-logic[3:0]  green_o;
-logic[3:0]  blue_o;
-
+logic       HDMI_R_CLK;
+logic       HDMI_R_HSYNC;
+logic       HDMI_R_VSYNC;
+logic       HDMI_R_DE;
+logic[15:0] HDMI_R_D;
 
 // I2C or IIC
-logic scl_o;
-wire  sda_io;
-logic i2c_done_o;
+wire  iic_sda_io;
+logic iic_scl_o;
+logic iic_mux_o;
+logic GPIO_LED_0_LS;
 
 always begin
   #SYS_CLK clk_i = ~clk_i;
 end
 
 always begin
-  #PXL_CLK pixel_clk_i = ~pixel_clk_i;
+  #SYS_CLK clk_n_i = ~clk_i;
 end
 
 // hdmi_controller_ADV7511
@@ -87,7 +80,7 @@ end
 // )
 // dut (.*);
 
-hdmi_wrapper dut(.*);
+hdmi_wrapper_vcu108 dut(.*);
 
 initial begin
   RESET;
@@ -95,9 +88,9 @@ initial begin
 end
 
 task RESET();
-  rst_n_i <= 0;
-  repeat(3) @(posedge clk_i);
   rst_n_i <= 1;
+  repeat(3) @(posedge clk_i);
+  rst_n_i <= 0;
   @(posedge clk_i);
 endtask
 

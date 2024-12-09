@@ -22,7 +22,7 @@ module video_controller
   localparam VCNTR_BITS   = $clog2(TOTAL_LINES),
   localparam FC_BITS      = $clog2(FPS)
 )(
-  input  logic                 clk_i      ,
+  // input  logic                 clk_i      ,
   input  logic                 pixel_clk_i,
   input  logic                 rst_n_i    ,
   output logic[HCNTR_BITS-1:0] hcount_o   ,
@@ -37,22 +37,22 @@ module video_controller
 enum logic { ACTIVE_VIDEO,
              INACTIVE_VIDEO } video_st_s;
 
-logic posedge_pxl_clk_ff_s;
-logic posedge_pxl_clk_s;
-always_ff @(posedge clk_i) begin
-  if (!rst_n_i) begin
-    posedge_pxl_clk_ff_s <= 1'b0;
-  end else begin
-    posedge_pxl_clk_ff_s <= pixel_clk_i;
-  end
-end
-assign posedge_pxl_clk_s = ~posedge_pxl_clk_ff_s & pixel_clk_i;
+// logic posedge_pxl_clk_ff_s;
+// logic posedge_pxl_clk_s;
+// always_ff @(posedge clk_i) begin
+//   if (!rst_n_i) begin
+//     posedge_pxl_clk_ff_s <= 1'b0;
+//   end else begin
+//     posedge_pxl_clk_ff_s <= pixel_clk_i;
+//   end
+// end
+// assign posedge_pxl_clk_s = ~posedge_pxl_clk_ff_s & pixel_clk_i;
 
 // {H,V}-counters
-always_ff @(posedge clk_i) begin : hv_counters
+always_ff @(posedge pixel_clk_i) begin : hv_counters
   if (!rst_n_i) begin
     {hcount_o, vcount_o} <= {(HCNTR_BITS + VCNTR_BITS){1'b0}};
-  end else if (posedge_pxl_clk_s) begin
+  end else begin
     if (hcount_o < TOTAL_PIXELS) begin
       hcount_o <= hcount_o + 'd1;
     end else begin
@@ -67,10 +67,10 @@ always_ff @(posedge clk_i) begin : hv_counters
   end
 end
 
-always_ff @(posedge clk_i) begin : rolling_fc
+always_ff @(posedge pixel_clk_i) begin : rolling_fc
   if(!rst_n_i) begin
     fc_o <= {FC_BITS{1'b0}};
-  end else if (posedge_pxl_clk_s) begin
+  end else begin
     fc_o <= nf_o ? (fc_o + 1'b1) : fc_o;
   end
 end

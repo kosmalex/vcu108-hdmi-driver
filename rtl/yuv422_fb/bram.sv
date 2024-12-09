@@ -20,13 +20,13 @@ initial begin
   $readmemh(INIT_FILE, mem);
 end
 
-always_ff @(posedge clk_i) begin
+always_ff @(negedge clk_i) begin
   if(wr_en_i) begin
     mem[wr_addr_i] <= wr_d_i;
   end
 end
 
-always_ff @(posedge clk_i) begin
+always_ff @(negedge clk_i) begin
   rd_d_o <= mem[rd_addr_i];
 end
 

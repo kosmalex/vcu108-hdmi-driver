@@ -1894,10 +1894,10 @@
 #Other net   PACKAGE_PIN G4       - FMC_HPC0_DP0_C2M_N        Bank 230 - MGTHTXN0_230
 
 ######## My constraints
-set_property -dict {PACKAGE_PIN G31 IOSTANDARD DIFF_SSTL12} [ get_ports "clk" ]
-set_property -dict {PACKAGE_PIN F31 IOSTANDARD DIFF_SSTL12} [ get_ports "clk_n"]
+set_property -dict {PACKAGE_PIN G31 IOSTANDARD DIFF_SSTL12} [ get_ports "clk_i" ]
+set_property -dict {PACKAGE_PIN F31 IOSTANDARD DIFF_SSTL12} [ get_ports "clk_n_i"]
 
-set_property -dict {PACKAGE_PIN E36 IOSTANDARD LVCMOS12}    [get_ports "rst_n"] ;# Bank  49 VCCO - VCC1V2_FPGA - IO_T1U_N12_49
+set_property -dict {PACKAGE_PIN E36 IOSTANDARD LVCMOS12}    [get_ports "rst_i"] ;# Bank  49 VCCO - VCC1V2_FPGA - IO_T1U_N12_49
 
 set_property -dict {PACKAGE_PIN AT32 IOSTANDARD  LVCMOS12}  [get_ports "GPIO_LED_0_LS"] ;# Bank  44 VCCO - VCC1V2_FPGA - IO_L19N_T3L_N1_DBC_AD9N_44
 
@@ -1957,7 +1957,7 @@ set_property PACKAGE_PIN AM33     [get_ports "HDMI_R_D[14]"] ;# Bank  47 VCCO - 
 set_property IOSTANDARD  LVCMOS18 [get_ports "HDMI_R_D[14]"] ;# Bank  47 VCCO - VADJ_1V8_FPGA - IO_L12P_T1U_N10_GC_47
 set_property PACKAGE_PIN AM31     [get_ports "HDMI_R_D[15]"] ;# Bank  47 VCCO - VADJ_1V8_FPGA - IO_T2U_N12_47
 set_property IOSTANDARD  LVCMOS18 [get_ports "HDMI_R_D[15]"] ;# Bank  47 VCCO - VADJ_1V8_FPGA - IO_T2U_N12_47
-set_property PACKAGE_PIN AM34     [get_ports "HDMI_R_D[16]"] ;# Bank  47 VCCO - VADJ_1V8_FPGA - IO_L12N_T1U_N11_GC_47
-set_property IOSTANDARD  LVCMOS18 [get_ports "HDMI_R_D[16]"] ;# Bank  47 VCCO - VADJ_1V8_FPGA - IO_L12N_T1U_N11_GC_47
-set_property PACKAGE_PIN AK35     [get_ports "HDMI_R_D[17]"] ;# Bank  47 VCCO - VADJ_1V8_FPGA - IO_T1U_N12_47
-set_property IOSTANDARD  LVCMOS18 [get_ports "HDMI_R_D[17]"] ;# Bank  47 VCCO - VADJ_1V8_FPGA - IO_T1U_N12_47
+# set_property PACKAGE_PIN AM34     [get_ports "HDMI_R_D[16]"] ;# Bank  47 VCCO - VADJ_1V8_FPGA - IO_L12N_T1U_N11_GC_47
+# set_property IOSTANDARD  LVCMOS18 [get_ports "HDMI_R_D[16]"] ;# Bank  47 VCCO - VADJ_1V8_FPGA - IO_L12N_T1U_N11_GC_47
+# set_property PACKAGE_PIN AK35     [get_ports "HDMI_R_D[17]"] ;# Bank  47 VCCO - VADJ_1V8_FPGA - IO_T1U_N12_47
+# set_property IOSTANDARD  LVCMOS18 [get_ports "HDMI_R_D[17]"] ;# Bank  47 VCCO - VADJ_1V8_FPGA - IO_T1U_N12_47

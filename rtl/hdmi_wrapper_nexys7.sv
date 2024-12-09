@@ -22,14 +22,10 @@ logic vs_s, hs_s;
 
 logic[15:0] hdmi_d_s;
 
-clk_divider #(
-  .DIVIDER (4)
-)
-clk_divider_0(
-  .*,
-  .hold_i (1'b0),
-  .reset_i(1'b0),
-  .clk_o  (pixel_clk_s)
+clk_wiz_0 clk_gen
+(
+  .clk_in1 (clk_i      ),
+  .clk_out1(pixel_clk_s)
 );
 
 hdmi_controller_ADV7511
@@ -59,6 +55,7 @@ hdmi_controller_ADV7511
 )
 hdmi_controller_ADV7511_0(
   .*,
+  .clk_i      (pixel_clk_s),
   .pixel_clk_i(pixel_clk_s),
 
   .vs_o(vs_s),
