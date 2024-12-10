@@ -90,6 +90,7 @@ assign iic_mux_o = 1'b1;
 
 assign rst_n_s = !rst_i;
 
+assign GPIO_LED_1_LS = 1'b0;
 assign GPIO_LED_2_LS = status_o[0][0];
 assign GPIO_LED_3_LS = status_o[0][1];
 assign GPIO_LED_4_LS = status_o[0][2];
