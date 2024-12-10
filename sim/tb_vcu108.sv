@@ -17,7 +17,6 @@ parameter FPS             = 30 ;//60  ;
 parameter FRAME_X_SCALE   = 0  ;//0   ; // These are 2^{frame_scale}
 parameter FRAME_Y_SCALE   = 0  ;//0   ; // These are 2^{frame_scale}
 
-
 // I2C generics
 parameter DIVIDER         = 50;
 parameter START_HOLD      = 10;

@@ -1,4 +1,4 @@
-module i2c
+module i2c import utils::*;
 #(
   DIVIDER     = 50,
   START_HOLD  = 10,
@@ -11,14 +11,16 @@ module i2c
   input  logic                      rst_n_i,
 
   input  logic                      send_i,
-  input  logic [$clog2(NBYTES)-1:0] nbytes_i,
+  input  logic [mclog2(NBYTES)-1:0] nbytes_i,
   input  logic [(NBYTES*8)-1:0]     data_i,
-  output logic [(NBYTES*8)-1:0]     data_o,
+  output logic [((NBYTES-1)*8)-1:0] data_o,
   output logic                      done_o,
   output logic                      ready_o,
 
   output logic                      scl_o,
-  inout  logic                      sda_io
+  inout  logic                      sda_io,
+
+  output logic [NBYTES-1:0]         status_o
 );
 
 typedef enum logic[3:0] {IDLE, START, START_INIT, ADDR_SEND, ADDR_ACK, SEND, READ, ACK, STOP_INIT, STOP, FREE} state_t;
@@ -50,7 +52,7 @@ logic [8:0]                    data_byte_s;
 
 logic [7:0]                    slv_addr_s;
 logic [7:0]                    slv_data_s;
-logic [(NBYTES*8)-1:0]         rcvd_data_s;
+logic [((NBYTES-1)*8)-1:0]     rcvd_data_s;
 
 logic                          init_send_data_s;
 
@@ -79,8 +81,8 @@ timer #(DATA_HOLD ) data_hold  (.*, .count_i(data_hold_count_s | scl_negedge_s) 
 timer #(FREE_HOLD ) free_hold  (.*, .count_i(free_hold_count_s) , .done_o(free_hold_done_s));
 
 // Information about a single I2C transaction.
-logic [$clog2(NBYTES)-1:0] nbytes_s;
-logic [$clog2(NBYTES)-1:0] nbytes_cntr_s;
+logic [mclog2(NBYTES)-1:0] nbytes_s;
+logic [mclog2(NBYTES)-1:0] nbytes_cntr_s;
 logic [(NBYTES*8)-1:0]     data_s;
 always_ff @(posedge clk_i) begin
   if (!rst_n_i) begin
@@ -210,6 +212,10 @@ always_ff @(posedge clk_i) begin
       end
 
       ADDR_ACK: begin
+        if (scl_posedge_s) begin
+          status_o[nbytes_s - nbytes_cntr_s] <= !sda_in_s;
+        end
+
         if (data_hold_done_s) begin
           st_s <= is_read_s ? READ : SEND;
         end
@@ -228,6 +234,10 @@ always_ff @(posedge clk_i) begin
       end
       
       ACK: begin
+        if (scl_posedge_s) begin
+          status_o[nbytes_s - nbytes_cntr_s] <= !sda_in_s;
+        end
+
         if (nbytes_cntr_s > 'd0) begin
           if (is_read_s) begin
             st_s <= data_hold_done_s ? READ : ACK;

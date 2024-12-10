@@ -21,12 +21,12 @@ module i2c_controller #(
 enum logic[2:0] { IDLE, INIT, SEND, INCR, DONE} st_s;
 
 logic                     i2c_send_s;
-logic[$clog2(NBYTES)-1:0] i2c_nbytes_s;
+logic[mclog2(NBYTES)-1:0] i2c_nbytes_s;
 logic                     i2c_done_s;
 logic                     i2c_ready_s;
-logic[$clog2(NTRANS)-1:0] i2c_trans_cnt_s;
+logic[mclog2(NTRANS)-1:0] i2c_trans_cnt_s;
 
-logic[$clog2(NTRANS)-1:0] rom_addr_s;
+logic[mclog2(NTRANS)-1:0] rom_addr_s;
 logic[NBYTES*8-1:0]       rom_data_s;
 
 i2c_rom #(
