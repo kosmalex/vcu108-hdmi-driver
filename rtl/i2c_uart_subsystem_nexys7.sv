@@ -1,12 +1,12 @@
 module i2c_uart_subsystem import utils::*;
 #(
-  DIVIDER     = 30,
+  DIVIDER     = 126,
   START_HOLD  = 35,
   STOP_HOLD   = 35,
   FREE_HOLD   = 75,
-  DATA_HOLD   = 5,
+  DATA_HOLD   = 30,
   NBYTES      = 2,
-  NTRANS      = 6,
+  NTRANS      = 4,
   INIT_FILE   = "i2c_uart.mem"
 )(
   input  logic clk_i,
@@ -15,6 +15,9 @@ module i2c_uart_subsystem import utils::*;
 
   input  logic led_en_i,
   output logic led_en_o,
+
+  output logic[7:0] LED,
+//  output logic[NBYTES-1:0] status_o[NTRANS],
 
   output logic scl_o,
   inout  logic sda_io,
@@ -25,9 +28,9 @@ module i2c_uart_subsystem import utils::*;
   output logic done_o
 );
 
-logic[NBYTES-1:0] status_o[NTRANS];
+ logic[NBYTES-1:0] status_o[NTRANS];
 
-enum logic[2:0] { IDLE, INIT, COM, TX_INIT, TX, INCR, DONE} st_s;
+enum logic[2:0] { IDLE, INIT, COM, TX_INIT, WAIT, TX, INCR, DONE} st_s;
 
 logic                     i2c_send_s;
 logic[mclog2(NBYTES)-1:0] i2c_nbytes_s;
@@ -95,6 +98,12 @@ uart uart_0 (
   .rd_err_o   (/*Not connected*/)
 );
 
+logic w8_hold_count_s;
+logic w8_hold_done_s;
+timer #(10000000) w8_hold (.*, .count_i(w8_hold_count_s), .done_o(w8_hold_done_s));
+
+assign w8_hold_count_s = (st_s == WAIT);
+
 // FSMD
 always_ff @(posedge clk_i) begin : i2c_fsmd
   if (!rst_n_i) begin
@@ -125,13 +134,15 @@ always_ff @(posedge clk_i) begin : i2c_fsmd
       end
 
       COM: begin
-        if (i2c_done_s) begin
+        if (i2c_done_s && (&status_s)) begin
           i2c_trans_cnt_s <= i2c_trans_cnt_s - 1'b1;
           rom_addr_s      <= rom_addr_s + 1'b1;
           i2c_ttype_s     <= rom_data_s[0];
         end
 
-        st_s <= i2c_ready_s ? INCR : COM;
+        if (i2c_ready_s) begin
+          st_s <= &status_s ? INCR : INIT;
+        end
       end
 
       INCR: begin
@@ -146,6 +157,12 @@ always_ff @(posedge clk_i) begin : i2c_fsmd
       TX_INIT: begin
         wr_valid_s <= 1'b0;
         st_s       <= TX;
+      end
+
+      WAIT: begin
+        if (w8_hold_done_s) begin
+          st_s <= TX;
+        end
       end
 
       TX: begin
@@ -163,6 +180,14 @@ always_ff @(posedge clk_i) begin : i2c_fsmd
 
       default: st_s <= IDLE;
     endcase
+  end
+end
+
+always_ff @(posedge clk_i) begin
+  if(!rst_n_i) begin
+    LED <= 8'b0;
+  end else if (st_s == TX_INIT) begin
+    LED <= i2c_data_s[7:0];
   end
 end
 

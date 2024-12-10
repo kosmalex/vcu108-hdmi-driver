@@ -4,13 +4,13 @@ module tb_nexys7_i2c_uart;
 
 parameter SYS_CLK = 10;
 
-parameter DIVIDER    = 30;
+parameter DIVIDER    = 126;
 parameter START_HOLD = 35;
 parameter STOP_HOLD  = 35;
 parameter FREE_HOLD  = 75;
-parameter DATA_HOLD  = 5;
+parameter DATA_HOLD  = 30;
 parameter NBYTES     = 2;
-parameter NTRANS     = 6;
+parameter NTRANS     = 2;
 parameter INIT_FILE  = "i2c_uart.mem";
 
 logic clk_i   = 0;

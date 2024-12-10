@@ -8,14 +8,17 @@ module i2c_controller #(
   NTRANS      = 40,
   INIT_FILE   = "i2c_rom.mem"
 )(
-  input  logic clk_i,
-  input  logic rst_n_i,
-  input  logic start_1cc_i,
+  input  logic      clk_i      ,
+  input  logic      rst_n_i    ,
+  input  logic      start_1cc_i,
 
-  output logic scl_o,
-  inout  logic sda_io,
+  // output logic[7:0] LED        ,
+  output logic[NBYTES-1:0] status_o[NTRANS],
 
-  output logic done_o
+  output logic      scl_o      ,
+  inout  logic      sda_io     ,
+
+  output logic      done_o
 );
 
 enum logic[2:0] { IDLE, INIT, SEND, INCR, DONE} st_s;
@@ -28,6 +31,8 @@ logic[mclog2(NTRANS)-1:0] i2c_trans_cnt_s;
 
 logic[mclog2(NTRANS)-1:0] rom_addr_s;
 logic[NBYTES*8-1:0]       rom_data_s;
+
+logic[NBYTES-1:0]         status_s;
 
 i2c_rom #(
   .LINES     (NTRANS   ),
@@ -65,7 +70,7 @@ i2c_0 (
 always_ff @(posedge clk_i) begin : i2c_fsmd
   if (!rst_n_i) begin
     i2c_trans_cnt_s <= NTRANS;
-    i2c_nbytes_s    <= 'd2;
+    i2c_nbytes_s    <= NBYTES;
     rom_addr_s      <= 'd0;
     done_o          <= 1'b0;
     st_s            <= IDLE;
@@ -74,7 +79,7 @@ always_ff @(posedge clk_i) begin : i2c_fsmd
       IDLE: begin
         if (start_1cc_i) begin
           i2c_trans_cnt_s <= NTRANS;
-          i2c_nbytes_s    <= 'd2; //First I2C transaction needs to send 2 bytes
+          i2c_nbytes_s    <= NBYTES; //First I2C transaction needs to send 2 bytes
           rom_addr_s      <= 'd0;
           done_o          <= 1'b0;
           st_s            <= INIT;
@@ -86,16 +91,20 @@ always_ff @(posedge clk_i) begin : i2c_fsmd
       end
 
       SEND: begin
-        if (i2c_done_s) begin
+        if (i2c_done_s && (&status_s)) begin
           i2c_nbytes_s    <= NBYTES;
           i2c_trans_cnt_s <= i2c_trans_cnt_s - 1'b1;
           rom_addr_s      <= rom_addr_s + 1'b1;
         end
 
-        st_s <= i2c_ready_s ? INCR : SEND;
+        if (i2c_ready_s) begin
+          st_s <= (&status_s) ? INCR : INIT;
+        end
       end
 
       INCR: begin
+        status_o[i2c_trans_cnt_s] <= status_s;
+
         if (i2c_trans_cnt_s > 0) begin
           st_s <= INIT;
         end else begin

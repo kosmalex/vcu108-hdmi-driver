@@ -14,8 +14,19 @@ module hdmi_wrapper_vcu108 (
   inout  logic iic_sda_io,
   output logic iic_scl_o,
   output logic iic_mux_o,
-  output logic GPIO_LED_0_LS
+
+  // LEDs
+  output logic GPIO_LED_0_LS,
+  output logic GPIO_LED_1_LS,
+  output logic GPIO_LED_2_LS,
+  output logic GPIO_LED_3_LS,
+  output logic GPIO_LED_4_LS,
+  output logic GPIO_LED_5_LS,
+  output logic GPIO_LED_6_LS,
+  output logic GPIO_LED_7_LS
 );
+
+logic[NBYTES-1:0] status_o[NTRANS];
 
 logic rst_n_s;
 logic clk_s, pixel_clk_s;
@@ -45,13 +56,13 @@ hdmi_controller_ADV7511
   .FRAME_Y_SCALE  (0   ), // These are 2^{frame_scale}
 
   // I2C generics
-  .DIVIDER       (50           ),
-  .START_HOLD    (10           ),
-  .STOP_HOLD     (10           ),
-  .FREE_HOLD     (10           ),
-  .DATA_HOLD     (5            ),
+  .DIVIDER       (126          ),
+  .START_HOLD    (35           ),
+  .STOP_HOLD     (35           ),
+  .FREE_HOLD     (75           ),
+  .DATA_HOLD     (30           ),
   .NBYTES        (3            ),
-  .NTRANS        (41           ),
+  .NTRANS        (2            ),
   .I2C_INIT_FILE ("i2c_rom.mem")
 )
 hdmi_controller_ADV7511_0(
@@ -78,4 +89,11 @@ assign HDMI_R_CLK   = pixel_clk_s;
 assign iic_mux_o = 1'b1;
 
 assign rst_n_s = !rst_i;
+
+assign GPIO_LED_2_LS = status_o[0][0];
+assign GPIO_LED_3_LS = status_o[0][1];
+assign GPIO_LED_4_LS = status_o[0][2];
+assign GPIO_LED_5_LS = status_o[1][0];
+assign GPIO_LED_6_LS = status_o[1][1];
+assign GPIO_LED_7_LS = status_o[1][2];
 endmodule

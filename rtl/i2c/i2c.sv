@@ -184,12 +184,14 @@ end
 // Main FSM for each state of the transaction.
 always_ff @(posedge clk_i) begin
   if (!rst_n_i) begin
-    st_s <= IDLE;
+    status_o <= {NBYTES{1'b0}};
+    st_s     <= IDLE;
   end else begin
     case (st_s)
       IDLE: begin
         if (send_i) begin
-          st_s <= START;
+          status_o <= {NBYTES{1'b0}};
+          st_s     <= START;
         end
       end
 
