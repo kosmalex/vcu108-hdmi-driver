@@ -26,7 +26,10 @@ module hdmi_wrapper_vcu108 (
   output logic GPIO_LED_7_LS
 );
 
-logic[NBYTES-1:0] status_o[NTRANS];
+localparam NBYTES = 3;
+localparam NTRANS = 41;
+
+logic[NBYTES-1:0] status_s[NTRANS];
 
 logic rst_n_s;
 logic clk_s, pixel_clk_s;
@@ -61,8 +64,8 @@ hdmi_controller_ADV7511
   .STOP_HOLD     (35           ),
   .FREE_HOLD     (75           ),
   .DATA_HOLD     (30           ),
-  .NBYTES        (3            ),
-  .NTRANS        (2            ),
+  .NBYTES        (NBYTES       ),
+  .NTRANS        (NTRANS       ),
   .I2C_INIT_FILE ("i2c_rom.mem")
 )
 hdmi_controller_ADV7511_0(
@@ -76,6 +79,7 @@ hdmi_controller_ADV7511_0(
   .scl_o      (iic_scl_o    ),
   .sda_io     (iic_sda_io   ),
   .i2c_done_o (GPIO_LED_0_LS),
+  .status_o   (status_s     ),
 
   .pxl_addr_i (0            ),
   .pxl_data_i (0            ),
@@ -91,10 +95,10 @@ assign iic_mux_o = 1'b1;
 assign rst_n_s = !rst_i;
 
 assign GPIO_LED_1_LS = 1'b0;
-assign GPIO_LED_2_LS = status_o[0][0];
-assign GPIO_LED_3_LS = status_o[0][1];
-assign GPIO_LED_4_LS = status_o[0][2];
-assign GPIO_LED_5_LS = status_o[1][0];
-assign GPIO_LED_6_LS = status_o[1][1];
-assign GPIO_LED_7_LS = status_o[1][2];
+assign GPIO_LED_2_LS = status_s[0][0];
+assign GPIO_LED_3_LS = status_s[0][1];
+assign GPIO_LED_4_LS = status_s[0][2];
+assign GPIO_LED_5_LS = status_s[1][0];
+assign GPIO_LED_6_LS = status_s[1][1];
+assign GPIO_LED_7_LS = status_s[1][2];
 endmodule

@@ -1,4 +1,5 @@
-module i2c_controller #(
+module i2c_controller import utils::*;
+#(
   DIVIDER     = 50,
   START_HOLD  = 10,
   STOP_HOLD   = 10,
@@ -62,6 +63,7 @@ i2c_0 (
   .data_i   (rom_data_s  ),
   .done_o   (i2c_done_s  ),
   .ready_o  (i2c_ready_s ),
+  .status_o (status_s    ),
 
   .data_o   (/*Unconnected*/)
 );
@@ -70,6 +72,7 @@ i2c_0 (
 always_ff @(posedge clk_i) begin : i2c_fsmd
   if (!rst_n_i) begin
     i2c_trans_cnt_s <= NTRANS;
+    status_o        <= '{default:0};
     i2c_nbytes_s    <= NBYTES;
     rom_addr_s      <= 'd0;
     done_o          <= 1'b0;
@@ -78,6 +81,7 @@ always_ff @(posedge clk_i) begin : i2c_fsmd
     case(st_s)
       IDLE: begin
         if (start_1cc_i) begin
+          status_o        <= '{default:0};
           i2c_trans_cnt_s <= NTRANS;
           i2c_nbytes_s    <= NBYTES; //First I2C transaction needs to send 2 bytes
           rom_addr_s      <= 'd0;
@@ -90,15 +94,15 @@ always_ff @(posedge clk_i) begin : i2c_fsmd
         st_s <= SEND;
       end
 
-      SEND: begin
-        if (i2c_done_s && (&status_s)) begin
+      SEND: begin//&& (&status_s)
+        if (i2c_done_s && (&status_s) ) begin
           i2c_nbytes_s    <= NBYTES;
           i2c_trans_cnt_s <= i2c_trans_cnt_s - 1'b1;
           rom_addr_s      <= rom_addr_s + 1'b1;
         end
 
         if (i2c_ready_s) begin
-          st_s <= (&status_s) ? INCR : INIT;
+          st_s <= /*INCR;*/(&status_s) ? INCR : INIT;
         end
       end
 
