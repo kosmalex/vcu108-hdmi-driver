@@ -32,7 +32,7 @@ localparam FB_ADDR_BITS = $clog2(FB_X*FB_Y);
 
 logic       clk_i   = 0;
 logic       clk_n_i = 1;
-logic       rst_n_i = 0;
+logic       rst_i   = 0;
 
 // HDMI
 logic       HDMI_R_CLK;
@@ -45,6 +45,9 @@ logic[15:0] HDMI_R_D;
 wire  iic_sda_io;
 logic iic_scl_o;
 logic iic_mux_o;
+logic sel = 0;
+
+assign iic_sda_io = sel ? 1'b0 : 1'bz;
 
 // LEDs
 logic GPIO_LED_0_LS;
@@ -62,6 +65,16 @@ end
 
 always begin
   #SYS_CLK clk_n_i = ~clk_i;
+end
+
+always begin
+  wait(iic_sda_io == 1'bz) begin
+    #1 sel = 1'b1;
+  end
+  
+  wait(iic_sda_io != 1'bz) begin 
+            #1 sel = 1'b0;
+    end
 end
 
 // hdmi_controller_ADV7511
@@ -96,9 +109,9 @@ initial begin
 end
 
 task RESET();
-  rst_n_i <= 1;
+  rst_i <= 1;
   repeat(3) @(posedge clk_i);
-  rst_n_i <= 0;
+  rst_i <= 0;
   @(posedge clk_i);
 endtask
 

@@ -33,7 +33,7 @@ module hdmi_controller_ADV7511
 
   input  logic[FB_ADDR_BITS-1:0] pxl_addr_i ,
   input  logic[23:0]             pxl_data_i ,
-  input  logic                   pxl_en_i   ,
+  input  logic                   pxl_en_i   ,  
 
   // HDMI
   output logic                   vs_o    , //Vertical sync out
@@ -44,7 +44,8 @@ module hdmi_controller_ADV7511
   // I2C or IIC
   output logic                   scl_o      ,
   inout  logic                   sda_io     ,
-  output logic                   i2c_done_o
+  output logic                   i2c_done_o ,
+  output logic[NBYTES-1:0]       status_o[NTRANS]
 );
 
 localparam TOTAL_PIXELS = ACTIVE_H_PIXELS 
@@ -73,6 +74,7 @@ yuv422_fb #(
 )
 yuv422_fb_0(
   .*,
+  .clk_i     (pixel_clk_i),
   .wr_addr_i (pxl_addr_i),
   .wr_d_i    (pxl_data_i),
   .wr_en_i   (pxl_en_i  ),
