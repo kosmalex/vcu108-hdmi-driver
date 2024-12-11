@@ -3,11 +3,11 @@ import numpy as np
 import PIL.Image as Image
 import matplotlib.pyplot as plt
 
-file_name = "dummy"
+file_name = "test"
 
 # Read entire file into YUV
 YUV   = np.fromfile(f'{file_name}.uyvy',dtype='uint8')
-image = Image.open(f'{file_name}.jpeg')
+image = Image.open(f'{file_name}.png')
 
 # Guess a width and height and derive number of pixels in image
 w,h = image.size
