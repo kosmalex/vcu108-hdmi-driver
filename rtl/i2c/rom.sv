@@ -1,12 +1,12 @@
-module i2c_rom import utils::*;
+module rom import utils::*;
 #(
   parameter LINES     = 16,
   parameter DW        = 32,
-  parameter INIT_FILE = "i2c_rom.mem"
+  parameter INIT_FILE = "rom.mem"
 )(
-  input  logic                    clka,
-  input  logic[mclog2(LINES)-1:0] addra,
-  output logic[DW-1:0]            douta
+  input  logic                 clka,
+  input  logic[cl2(LINES)-1:0] addra,
+  output logic[DW-1:0]         douta
 );
 
 (* ram_style = "block" *)

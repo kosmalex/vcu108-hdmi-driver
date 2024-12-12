@@ -4,6 +4,8 @@
 *.wlf
 transcript
 
-*.mem
-*.uyvy
-*.jpeg
+/convert/*.mem
+/convert/*.uyvy
+/convert/*.jpeg
+
+/vivado/

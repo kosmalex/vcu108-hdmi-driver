@@ -1,5 +1,5 @@
 package utils;
-  function automatic int mclog2(int i);
-    mclog2 = (i%2==0) ? $clog2(i+1) : $clog2(i);
+  function automatic int cl2(int i);
+    cl2 = (i%2==0) ? $clog2(i+1) : $clog2(i);
   endfunction
 endpackage

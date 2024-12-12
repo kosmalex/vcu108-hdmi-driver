@@ -11,7 +11,7 @@ module i2c import utils::*;
   input  logic                      rst_n_i,
 
   input  logic                      send_i,
-  input  logic [mclog2(NBYTES)-1:0] nbytes_i,
+  input  logic [cl2(NBYTES)-1:0] nbytes_i,
   input  logic [(NBYTES*8)-1:0]     data_i,
   output logic [((NBYTES-1)*8)-1:0] data_o,
   output logic                      done_o,
@@ -81,8 +81,8 @@ timer #(DATA_HOLD ) data_hold  (.*, .count_i(data_hold_count_s | scl_negedge_s) 
 timer #(FREE_HOLD ) free_hold  (.*, .count_i(free_hold_count_s) , .done_o(free_hold_done_s));
 
 // Information about a single I2C transaction.
-logic [mclog2(NBYTES)-1:0] nbytes_s;
-logic [mclog2(NBYTES)-1:0] nbytes_cntr_s;
+logic [cl2(NBYTES)-1:0] nbytes_s;
+logic [cl2(NBYTES)-1:0] nbytes_cntr_s;
 logic [(NBYTES*8)-1:0]     data_s;
 always_ff @(posedge clk_i) begin
   if (!rst_n_i) begin

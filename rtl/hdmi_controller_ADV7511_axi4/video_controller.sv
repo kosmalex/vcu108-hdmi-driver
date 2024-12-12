@@ -9,6 +9,7 @@ module video_controller
   parameter V_SYNC_WIDTH    = 5   ,
   parameter V_BACK_PORCH    = 20  ,
   parameter FPS             = 60  ,
+  parameter SYNC_POLARITY   = 0   , // Sync is low `0`
 
   localparam TOTAL_PIXELS = ACTIVE_H_PIXELS 
                             + H_FRONT_PORCH 
@@ -36,17 +37,6 @@ module video_controller
 
 enum logic { ACTIVE_VIDEO,
              INACTIVE_VIDEO } video_st_s;
-
-// logic posedge_pxl_clk_ff_s;
-// logic posedge_pxl_clk_s;
-// always_ff @(posedge clk_i) begin
-//   if (!rst_n_i) begin
-//     posedge_pxl_clk_ff_s <= 1'b0;
-//   end else begin
-//     posedge_pxl_clk_ff_s <= pixel_clk_i;
-//   end
-// end
-// assign posedge_pxl_clk_s = ~posedge_pxl_clk_ff_s & pixel_clk_i;
 
 // {H,V}-counters
 always_ff @(posedge pixel_clk_i) begin : hv_counters
@@ -80,13 +70,25 @@ always_comb begin : deduce_vid_st
                (vcount_o < ACTIVE_LINES))  ? ACTIVE_VIDEO : INACTIVE_VIDEO;
 end
 
-always_comb begin : hv_syncs
-  hs_o = (hcount_o > ACTIVE_H_PIXELS + H_FRONT_PORCH               ) && 
-         (hcount_o < ACTIVE_H_PIXELS + H_FRONT_PORCH + H_SYNC_WIDTH);
+generate
+  if (SYNC_POLARITY) begin
+    always_comb begin : hv_syncs_high
+      hs_o = (hcount_o > ACTIVE_H_PIXELS + H_FRONT_PORCH               ) && 
+             (hcount_o < ACTIVE_H_PIXELS + H_FRONT_PORCH + H_SYNC_WIDTH);
 
-  vs_o = (vcount_o > ACTIVE_LINES + V_FRONT_PORCH               ) && 
-         (vcount_o < ACTIVE_LINES + V_FRONT_PORCH + V_SYNC_WIDTH);
-end
+      vs_o = (vcount_o > ACTIVE_LINES + V_FRONT_PORCH               ) && 
+             (vcount_o < ACTIVE_LINES + V_FRONT_PORCH + V_SYNC_WIDTH);
+    end
+  end else begin
+    always_comb begin : hv_syncs_low
+      hs_o = ~((hcount_o > ACTIVE_H_PIXELS + H_FRONT_PORCH               ) && 
+              (hcount_o < ACTIVE_H_PIXELS + H_FRONT_PORCH + H_SYNC_WIDTH)  );
+
+      vs_o = ~((vcount_o > ACTIVE_LINES + V_FRONT_PORCH               ) && 
+              (vcount_o < ACTIVE_LINES + V_FRONT_PORCH + V_SYNC_WIDTH)  );
+    end
+  end
+endgenerate
 
 assign ad_o = (video_st_s == ACTIVE_VIDEO);
 assign nf_o = (hcount_o == ACTIVE_H_PIXELS) && (vcount_o == ACTIVE_LINES);

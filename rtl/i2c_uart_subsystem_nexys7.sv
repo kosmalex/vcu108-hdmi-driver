@@ -33,14 +33,14 @@ module i2c_uart_subsystem import utils::*;
 enum logic[2:0] { IDLE, INIT, COM, TX_INIT, WAIT, TX, INCR, DONE} st_s;
 
 logic                     i2c_send_s;
-logic[mclog2(NBYTES)-1:0] i2c_nbytes_s;
+logic[cl2(NBYTES)-1:0] i2c_nbytes_s;
 logic                     i2c_done_s;
 logic                     i2c_ready_s;
 logic[((NBYTES-1)*8)-1:0] i2c_data_s;
-logic[mclog2(NTRANS)-1:0] i2c_trans_cnt_s;
+logic[cl2(NTRANS)-1:0] i2c_trans_cnt_s;
 logic                     i2c_ttype_s;
 
-logic[mclog2(NTRANS)-1:0] rom_addr_s;
+logic[cl2(NTRANS)-1:0] rom_addr_s;
 logic[NBYTES*8-1:0]       rom_data_s;
 
 logic       wr_valid_s;

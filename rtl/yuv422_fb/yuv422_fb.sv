@@ -22,6 +22,10 @@ logic[7:0] cb_s, cr_s;
 logic[7:0] chroma_s;
 */
 
+logic[7:0] cb_s, cr_s;
+logic[7:0] chroma_s;
+
+
 bram #(
   .LINES    (PIXELS),
   .DW       (8),
@@ -56,7 +60,23 @@ CbCr_mem(
 assign chroma_s = rd_addr_i[0] ? cb_s : cr_s;
 assign rd_d_o   = {chroma_s, y_s};
 */
+bram #(
+  .LINES    (PIXELS >> 1),
+  .DW       (16),
+  .INIT_FILE(UV_FILE)
+)
+CbCr_mem(
+  .*,
+  .wr_addr_i (wr_addr_i[ADR_BITS-1:1]),
+  .wr_d_i    (wr_d_i[0+:16]        ),
+  .wr_en_i   (wr_en_i              ),
 
-assign rd_d_o = {8'b0, y_s};
+  .rd_addr_i (rd_addr_i[ADR_BITS-1:1]),
+  .rd_d_o    ({cb_s, cr_s})
+);
+
+assign chroma_s = rd_addr_i[0] ? cr_s : cb_s;
+assign rd_d_o   = {chroma_s, y_s};
+//assign rd_d_o = {8'b0, y_s};
 
 endmodule

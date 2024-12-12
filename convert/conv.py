@@ -3,7 +3,7 @@ import numpy as np
 import PIL.Image as Image
 import matplotlib.pyplot as plt
 
-file_name = "dummy"
+file_name = "me"
 
 # Read entire file into YUV
 YUV   = np.fromfile(f'{file_name}.uyvy',dtype='uint8')

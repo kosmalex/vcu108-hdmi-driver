@@ -1908,6 +1908,16 @@ set_property -dict {PACKAGE_PIN AV36 IOSTANDARD LVCMOS12} [get_ports "GPIO_LED_5
 set_property -dict {PACKAGE_PIN AY35 IOSTANDARD LVCMOS12} [get_ports "GPIO_LED_6_LS"] ;# Bank  46 VCCO - VCC1V2_FPGA - IO_T2U_N12_46
 set_property -dict {PACKAGE_PIN BA37 IOSTANDARD LVCMOS12} [get_ports "GPIO_LED_7_LS"] ;# Bank  46 VCCO - VCC1V2_FPGA - IO_L13N_T2L_N1_GC_QBC_46
 
+set_property PACKAGE_PIN BC40     [get_ports "GPIO_DIP_SW0"] ;# Bank  46 VCCO - VCC1V2_FPGA - IO_T1U_N12_46
+set_property IOSTANDARD  LVCMOS12 [get_ports "GPIO_DIP_SW0"] ;# Bank  46 VCCO - VCC1V2_FPGA - IO_T1U_N12_46
+set_property PACKAGE_PIN C37      [get_ports "GPIO_DIP_SW2"] ;# Bank  49 VCCO - VCC1V2_FPGA - IO_L19N_T3L_N1_DBC_AD9N_49
+set_property IOSTANDARD  LVCMOS12 [get_ports "GPIO_DIP_SW2"] ;# Bank  49 VCCO - VCC1V2_FPGA - IO_L19N_T3L_N1_DBC_AD9N_49
+set_property PACKAGE_PIN C38      [get_ports "GPIO_DIP_SW3"] ;# Bank  49 VCCO - VCC1V2_FPGA - IO_T2U_N12_49
+set_property IOSTANDARD  LVCMOS12 [get_ports "GPIO_DIP_SW3"] ;# Bank  49 VCCO - VCC1V2_FPGA - IO_T2U_N12_49
+set_property PACKAGE_PIN L19      [get_ports "GPIO_DIP_SW1"] ;# Bank  71 VCCO - VCC1V2_FPGA - IO_T1U_N12_71
+set_property IOSTANDARD  LVCMOS12 [get_ports "GPIO_DIP_SW1"] ;# Bank  71 VCCO - VCC1V2_FPGA - IO_T1U_N12_71
+
+
 
 set_property PACKAGE_PIN AM23     [get_ports "iic_mux_o"] ;# Bank  84 VCCO - VCC1V8_FPGA - IO_L22P_T3U_N6_DBC_AD0P_84
 set_property IOSTANDARD  LVCMOS18 [get_ports "iic_mux_o"] ;# Bank  84 VCCO - VCC1V8_FPGA - IO_L22P_T3U_N6_DBC_AD0P_84

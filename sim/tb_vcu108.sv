@@ -5,14 +5,14 @@ module tb_vcu108;
 parameter SYS_CLK = 3333;
 
 // HDMI generics
-parameter ACTIVE_H_PIXELS = 640;//1280;
-parameter H_FRONT_PORCH   = 16 ;//110 ;
-parameter H_SYNC_WIDTH    = 96 ;//40  ;
-parameter H_BACK_PORCH    = 48 ;//220 ;
-parameter ACTIVE_LINES    = 480;//720 ;
-parameter V_FRONT_PORCH   = 11 ;//5   ;
-parameter V_SYNC_WIDTH    = 2  ;//5   ;
-parameter V_BACK_PORCH    = 31 ;//20  ;
+parameter ACTIVE_H_PIXELS = 3;/*1280*///640;//1280;
+parameter H_FRONT_PORCH   = 1;/*110 *///16 ;//110 ;
+parameter H_SYNC_WIDTH    = 1;/*40  *///96 ;//40  ;
+parameter H_BACK_PORCH    = 1;/*220 *///48 ;//220 ;
+parameter ACTIVE_LINES    = 3;/*720 *///480;//720 ;
+parameter V_FRONT_PORCH   = 1;/*5   *///11 ;//5   ;
+parameter V_SYNC_WIDTH    = 1;/*5   *///2  ;//5   ;
+parameter V_BACK_PORCH    = 1;/*20  *///31 ;//20  ;
 parameter FPS             = 30 ;//60  ;
 parameter FRAME_X_SCALE   = 0  ;//0   ; // These are 2^{frame_scale}
 parameter FRAME_Y_SCALE   = 0  ;//0   ; // These are 2^{frame_scale}
@@ -59,6 +59,11 @@ logic GPIO_LED_5_LS;
 logic GPIO_LED_6_LS;
 logic GPIO_LED_7_LS;
 
+logic GPIO_DIP_SW0;
+logic GPIO_DIP_SW1;
+logic GPIO_DIP_SW2;
+logic GPIO_DIP_SW3;
+
 always begin
   #SYS_CLK clk_i = ~clk_i;
 end
@@ -67,15 +72,15 @@ always begin
   #SYS_CLK clk_n_i = ~clk_i;
 end
 
-always begin
-  wait(iic_sda_io == 1'bz) begin
-    #1 sel = 1'b1;
-  end
+//always begin
+//  wait(iic_sda_io == 1'bz) begin
+//    #1 sel = 1'b1;
+//  end
   
-  wait(iic_sda_io != 1'bz) begin 
-            #1 sel = 1'b0;
-    end
-end
+//  wait(iic_sda_io != 1'bz) begin 
+//            #1 sel = 1'b0;
+//    end
+//end
 
 // hdmi_controller_ADV7511
 // #(
