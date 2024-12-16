@@ -5,7 +5,7 @@ module rom import utils::*;
   parameter INIT_FILE = "rom.mem"
 )(
   input  logic                 clka,
-  input  logic[cl2(LINES)-1:0] addra,
+  input  logic[$clog2(LINES)-1:0] addra,
   output logic[DW-1:0]         douta
 );
 

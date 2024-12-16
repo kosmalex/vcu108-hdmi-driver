@@ -50,7 +50,7 @@ logic                          scl_posedge_s;
 logic [3:0]                    bits_sent_counter_reg_s;
 logic [8:0]                    data_byte_s;
 
-logic [7:0]                    slv_addr_s;
+//logic [7:0]                    slv_addr_s;
 logic [7:0]                    slv_data_s;
 logic [((NBYTES-1)*8)-1:0]     rcvd_data_s;
 
