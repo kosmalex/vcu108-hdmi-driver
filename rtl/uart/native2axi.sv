@@ -10,10 +10,10 @@ module native2axi #(
   output logic        wr_ready_o,
   output logic        wr_err_o,
 
-  output logic        rd_valid_o,
+  output logic        rd_valid_i,
   output logic[W-1:0] rd_data_o ,
   input  logic[A-1:0] rd_addr_i ,
-  input  logic        rd_ready_i,
+  input  logic        rd_ready_o,
   output logic        rd_err_o,
 
   output logic[A-1:0] s_axi_awaddr,
@@ -39,10 +39,20 @@ module native2axi #(
   output logic        s_axi_rready
 );
 
-enum logic[2:0] { IDLE, WR_ADDR, WR_DATA, WR_RESP } st_s;
+enum logic[2:0] {IDLE, WR_ADDR, WR_DATA, WR_RESP, RD_ADDR, RD_DATA} st_s;
 
 always_ff @(posedge clk_i) begin
   if(!rst_n_i) begin
+    { wr_ready_o   , wr_err_o     , 
+      rd_valid_i   ,  s_axi_awaddr,
+      rd_data_o    , rd_err_o     , 
+      s_axi_awvalid, s_axi_wdata  , 
+      s_axi_wstrb  , s_axi_wvalid , 
+      s_axi_araddr , s_axi_arvalid } <= 'd0;
+    
+    s_axi_bready <= 1'b1;
+    s_axi_rready <= 1'b1;
+
     st_s <= IDLE;
   end else begin
     case(st_s)
@@ -58,6 +68,16 @@ always_ff @(posedge clk_i) begin
           s_axi_bready  <= 1'b1;
 
           st_s          <= WR_ADDR;
+        end
+
+        if (rd_valid_i) begin
+          s_axi_araddr  <= rd_addr_i;
+          s_axi_arvalid <= 1'b1;
+          s_axi_rready  <= 1'b1;
+
+          rd_ready_o    <= 1'b0;
+
+          st_s          <= RD_ADDR;
         end
       end
 
@@ -98,17 +118,33 @@ always_ff @(posedge clk_i) begin
         end
       end
 
+      RD_ADDR: begin
+        if (s_axi_arready && s_axi_rvalid) begin
+          rd_data_o     <= s_axi_rdata;
+          rd_ready_o    <= 1'b1;
+          s_axi_arvalid <= 1'b0;
+
+          st_s          <= IDLE;
+        end else if (s_axi_arready) begin
+          s_axi_arvalid <= 1'b0;
+          st_s          <= RD_DATA;
+        end 
+      end
+
+      RD_DATA: begin
+        if (s_axi_rvalid) begin
+          rd_data_o  <= s_axi_rdata;
+          rd_ready_o <= 1'b1;
+
+          st_s       <= IDLE;
+        end
+      end
+
       default: st_s <= IDLE;
     endcase
   end
 end
 
 assign wr_ready_o = (st_s == IDLE);
-
-
-// Reads to be implemented
-assign s_axi_araddr  = 4'b0;
-assign s_axi_arvalid = 1'b0;
-assign s_axi_rready  = 1'b0;
 
 endmodule

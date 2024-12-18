@@ -8,11 +8,10 @@ module uart (
   output logic       wr_ready_o,
   output logic       wr_err_o,
 
-
-  output logic       rd_valid_o,
+  output logic       rd_valid_i,
   output logic[31:0] rd_data_o ,
   input  logic[3:0]  rd_addr_i ,
-  input  logic       rd_ready_i,
+  input  logic       rd_ready_o,
   output logic       rd_err_o,
 
   output logic       tx,
